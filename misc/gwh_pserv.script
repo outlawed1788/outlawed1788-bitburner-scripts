@@ -1,0 +1,89 @@
+disableLog("disableLog");
+disableLog("getHostname");
+disableLog("fileExists");
+disableLog("write");
+disableLog("read");
+disableLog("getServerMaxMoney");
+disableLog("getServerMinSecurityLevel");
+disableLog("getServerSecurityLevel");
+disableLog("getServerMoneyAvailable");
+disableLog("getServerMoneyAvailable");
+
+function time(mduration) {
+    // Hours, minutes and seconds
+    duration = mduration / 1000;
+    var hrs = ~~(duration / 3600);
+    var mins = ~~((duration % 3600) / 60);
+    var secs = ~~duration % 60;
+
+    // Output like "1:01" or "4:03:59" or "123:03:59"
+    var ret = "";
+
+    if (hrs > 0) {
+        ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+    }
+
+    ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+    ret += "" + secs;
+    return ret;
+}
+
+var localhost = getHostname();
+
+
+while (true) {
+    scp(args['0']+".txt", "home", localhost);
+    print(localhost + ": Reading ptarget.txt...");
+    var target = read(args['0']+".txt");
+    print(localhost + ": Done! Target is: " + target);
+    var moneyThresh = getServerMaxMoney(target) * 0.75;
+    var securityThresh = getServerMinSecurityLevel(target) + 5;
+
+    print(localhost + ": Checking For Root Access.");
+    if (!hasRootAccess(target)) {
+        print(localhost + ": Gaining Root Access...");
+        //tprint(localhost + ": Gaining Root Access...");
+        var ports = 0;
+        if (fileExists("BruteSSH.exe", "home")) {
+            brutessh(target);
+            ports++;
+        }
+        if (fileExists("FTPCrack.exe", "home")) {
+            ftpcrack(target);
+            ports++;
+        }
+        if (fileExists("relaySMTP.exe", "home")) {
+            relaysmtp(target);
+            ports++;
+        }
+        if (fileExists("SQLInject.exe", "home")) {
+            sqlinject(target);
+            ports++;
+        }
+        if (fileExists("HTTPWorm.exe", "home")) {
+            httpworm(target);
+            ports++;
+        }
+        if (ports >= getServerNumPortsRequired(target)) {
+            nuke(target);
+        } else {
+            print("Not Enough Ports");
+        }
+
+    }
+
+
+    if (getServerSecurityLevel(target) > securityThresh) {
+        // If the server's security level is above our threshold, weaken it
+        print(localhost + ": Weakening " + target + " in " + time(getWeakenTime(target)));
+        weaken(target);
+    } else if (getServerMoneyAvailable(target) < moneyThresh) {
+        // If the server's money is less than our threshold, grow it
+        print(localhost + ": Growing " + target + " in " + time(getGrowTime(target)));
+        grow(target);
+    } else {
+        // Otherwise, hack it
+        print(localhost + ": Hacking " + target + " in " + time(getHackTime(target)));
+        tprint(localhost + ": Hacked " +target+ " for: " + String(hack(target).toLocaleString(undefined, { style: 'currency', currency: 'USD', })));
+    }
+}

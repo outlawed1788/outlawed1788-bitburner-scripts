@@ -1,0 +1,8 @@
+brutessh(args['0']);
+httpworm(args['0']);
+ftpcrack(args['0']);
+sqlinject(args['0']);
+relaysmtp(args['0']);
+nuke(args['0']);
+scp("worm.script", "home", args['0']);
+exec("worm.script", args['0']);
